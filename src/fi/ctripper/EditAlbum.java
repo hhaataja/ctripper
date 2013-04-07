@@ -99,8 +99,6 @@ public class EditAlbum extends FragmentActivity {
 			        Uri selectedImage = returnedIntent.getData();
 			        DummySectionFragment fragment = (DummySectionFragment) mSectionsPagerAdapter.getItem(1);
 			        Log.d(TAG, selectedImage.toString());
-			        
-			        mSectionsPagerAdapter.
 				}
 			}
 		}

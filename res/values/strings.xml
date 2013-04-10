@@ -16,5 +16,7 @@
     <string name="title_activity_edit_album">EditAlbum</string>
     <string name="menu_add_photo">Add Photo</string>
     <string name="title_add_photo">Add photo</string>
+    <string name="title_remove_section">Del</string>
+    <string name="title_add_section">Add</string>
 
 </resources>

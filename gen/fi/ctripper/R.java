@@ -22,20 +22,23 @@ public final class R {
     }
     public static final class drawable {
         public static final int ic_action_add_photo=0x7f020000;
-        public static final int ic_launcher=0x7f020001;
+        public static final int ic_action_add_section=0x7f020001;
+        public static final int ic_action_remove_section=0x7f020002;
+        public static final int ic_launcher=0x7f020003;
     }
     public static final class id {
         public static final int GridLayout1=0x7f080003;
         public static final int action_settings=0x7f08000a;
-        public static final int addPhoto=0x7f08000b;
+        public static final int addSection=0x7f08000b;
         public static final int button2=0x7f080006;
         public static final int button_list_albums=0x7f080005;
         public static final int displayMessageText=0x7f080000;
-        public static final int imageButton1=0x7f080009;
+        public static final int imageButton1=0x7f080008;
         public static final int pager=0x7f080001;
         public static final int pager_title_strip=0x7f080002;
         public static final int photoImageView=0x7f080007;
-        public static final int section_label=0x7f080008;
+        public static final int removeSection=0x7f08000c;
+        public static final int section_label=0x7f080009;
         public static final int textView2=0x7f080004;
     }
     public static final class layout {
@@ -66,6 +69,8 @@ public final class R {
         public static final int title_activity_edit_album=0x7f05000c;
         public static final int title_activity_my_ctrips=0x7f050003;
         public static final int title_add_photo=0x7f05000e;
+        public static final int title_add_section=0x7f050010;
+        public static final int title_remove_section=0x7f05000f;
         public static final int title_section1=0x7f050004;
         public static final int title_section2=0x7f050005;
         public static final int title_section3=0x7f050006;

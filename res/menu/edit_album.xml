@@ -6,11 +6,16 @@
         android:showAsAction="never"
         android:title="@string/action_settings"/>
     <item
-        android:id="@+id/addPhoto"
+        android:id="@+id/addSection"
         android:showAsAction="ifRoom|collapseActionView"
-        android:title="@string/title_add_photo" 
-        android:icon="@android:drawable/ic_menu_gallery" />
-<!--         android:onClick="showBrowsePhotoDialog">  -->
+        android:title="@string/title_add_section" 
+        android:icon="@android:drawable/ic_menu_add" />
+    
+        <item
+        android:id="@+id/removeSection"
+        android:showAsAction="ifRoom|collapseActionView"
+        android:title="@string/title_remove_section" 
+        android:icon="@android:drawable/ic_menu_delete" />
 
 
 </menu>

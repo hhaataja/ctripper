@@ -1,6 +1,6 @@
 package fi.ctripper;
 
-import java.util.Locale;
+import java.util.LinkedList;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ImageView;
 
 public class EditAlbum extends FragmentActivity {
@@ -79,31 +80,34 @@ public class EditAlbum extends FragmentActivity {
 			NavUtils.navigateUpFromSameTask(this);
 			return true;
 		}
-		case R.id.addPhoto:{
-			Intent pickPhoto = new Intent(Intent.ACTION_PICK,
-			           android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-			startActivityForResult(pickPhoto , ADD_PHOTO_RESULT);
+		case R.id.addSection:{
+			this.mSectionsPagerAdapter.addSection();
+		}
+
+		case R.id.removeSection:{
+//			this.mSectionsPagerAdapter.removeSection(position)
 		}
 			
 		}
 		return super.onOptionsItemSelected(item);
 	}
 	
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent returnedIntent) {
-		super.onActivityResult(requestCode, resultCode, returnedIntent);
-		
-		switch(requestCode){
-			case ADD_PHOTO_RESULT:{
-				if(resultCode == RESULT_OK){
-			        Uri selectedImage = returnedIntent.getData();
-			        DummySectionFragment fragment = (DummySectionFragment) mSectionsPagerAdapter.getItem(1);
-			        Log.d(TAG, selectedImage.toString());
-				}
-			}
-		}
-		
-	}
+//	@Override
+//	protected void onActivityResult(int requestCode, int resultCode, Intent returnedIntent) {
+//		super.onActivityResult(requestCode, resultCode, returnedIntent);
+//		
+//		switch(requestCode){
+//			case ADD_PHOTO_RESULT:{
+//				if(resultCode == RESULT_OK){
+//			        Uri selectedImage = returnedIntent.getData();
+//			        PhotoSectionFragment fragment = (PhotoSectionFragment) mSectionsPagerAdapter.getItem(1);
+//			        Log.d(TAG, selectedImage.toString());
+//			        fragment.setImage(selectedImage);
+//				}
+//			}
+//		}
+//		
+//	}
 	
 //	public void showBrowsePhotoDialog(View view){
 //		Intent pickPhoto = new Intent(Intent.ACTION_PICK,
@@ -116,9 +120,12 @@ public class EditAlbum extends FragmentActivity {
 	 * one of the sections/tabs/pages.
 	 */
 	public class SectionsPagerAdapter extends FragmentPagerAdapter {
+		
+		LinkedList<Fragment> fragmentsList = new LinkedList<Fragment>();
 
 		public SectionsPagerAdapter(FragmentManager fm) {
 			super(fm);
+			this.addSection();
 		}
 
 		@Override
@@ -126,31 +133,29 @@ public class EditAlbum extends FragmentActivity {
 			// getItem is called to instantiate the fragment for the given page.
 			// Return a DummySectionFragment (defined as a static inner class
 			// below) with the page number as its lone argument.
-			Fragment fragment = new DummySectionFragment();
+			Fragment fragment = fragmentsList.get(position);			
 			Bundle args = new Bundle();
-			args.putInt(DummySectionFragment.ARG_SECTION_NUMBER, position + 1);
+			args.putInt(PhotoSectionFragment.ARG_SECTION_NUMBER, position + 1);
 			fragment.setArguments(args);
 			return fragment;
 		}
 
 		@Override
 		public int getCount() {
-			// Show 3 total pages.
-			return 3;
+			return fragmentsList.size();
 		}
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-			Locale l = Locale.getDefault();
-			switch (position) {
-			case 0:
-				return getString(R.string.title_section1).toUpperCase(l);
-			case 1:
-				return getString(R.string.title_section2).toUpperCase(l);
-			case 2:
-				return getString(R.string.title_section3).toUpperCase(l);
-			}
-			return null;
+			return "Page-"+position;
+		}
+		
+		public void removeSection(int position){
+			this.fragmentsList.remove(position);
+		}
+		
+		public void addSection(){
+			this.fragmentsList.add(new PhotoSectionFragment());
 		}
 	}
 
@@ -158,7 +163,7 @@ public class EditAlbum extends FragmentActivity {
 	 * A dummy fragment representing a section of the app, but that simply
 	 * displays dummy text.
 	 */
-	public static class DummySectionFragment extends Fragment {
+	public static class PhotoSectionFragment extends Fragment {
 		/**
 		 * The fragment argument representing the section number for this
 		 * fragment.
@@ -166,8 +171,10 @@ public class EditAlbum extends FragmentActivity {
 		public static final String ARG_SECTION_NUMBER = "section_number";
 		public static final String ARG_PHOTO_URI = "photo_uri";
 		private Uri imageUri;
+		private View view;
+		private OnItemSelectedListener listener;
 
-		public DummySectionFragment() {
+		public PhotoSectionFragment() {
 		}
 
 		@Override
@@ -176,23 +183,42 @@ public class EditAlbum extends FragmentActivity {
 			// Prepare root view
 			View rootView = inflater.inflate(
 					R.layout.fragment_album_photo, container, false);
+			this.view = rootView;
 			
 			// Prepare Image view if image uri is set
-			Uri uri = (Uri) this.getArguments().get(ARG_PHOTO_URI);
+			Uri uri = (Uri) this.getArguments().get(ARG_PHOTO_URI);			
 			if(uri != null){
 				setImageUri(uri);
+			}
+			
+			if(this.getImageUri() != null){
 				ImageView imageView = (ImageView) rootView.findViewById(R.id.photoImageView);
 				imageView.setImageURI(uri);
 			}
+			
+		    ImageView imageView = (ImageView) rootView.findViewById(R.id.photoImageView);
+		    imageView.setOnClickListener(new View.OnClickListener() {
+		      @Override
+		      public void onClick(View v) {
+		        browseForPhoto();
+		      }
+		    });
+			
 			return rootView;
 		}
 		
 		@Override
-		public void setArguments(Bundle args) {
-			super.setArguments(args);
-			Uri uri = (Uri) args.get(ARG_PHOTO_URI);
-			if(uri != null){
-				this.setImageUri(uri);				
+		public void onResume() {
+			Log.d(TAG, "PhotoFragment resumes");
+			updateImageToView();
+			super.onResume();
+		}		
+		
+		private void updateImageToView(){
+			if(this.imageUri != null){
+				ImageView imageView = (ImageView) this.view.findViewById(R.id.photoImageView);
+				imageView.setImageURI(this.imageUri);
+				imageView.refreshDrawableState();
 			}
 		}
 
@@ -202,6 +228,28 @@ public class EditAlbum extends FragmentActivity {
 
 		public void setImageUri(Uri imageUri) {
 			this.imageUri = imageUri;
+		}
+		
+		public void browseForPhoto(){
+			Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+			           android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+			startActivityForResult(pickPhoto , ADD_PHOTO_RESULT);
+		}
+		
+		public void onActivityResult(int requestCode, int resultCode, Intent returnedIntent) {
+			super.onActivityResult(requestCode, resultCode, returnedIntent);
+			Log.d(TAG, "OnActivityResult with requestCode:"+requestCode);
+			switch(requestCode){
+				case ADD_PHOTO_RESULT:{
+					if(resultCode == RESULT_OK){
+				        Uri selectedImage = returnedIntent.getData();
+				        Log.d(TAG, selectedImage.toString());
+				        this.setImageUri(selectedImage);
+				        this.updateImageToView();
+					}
+				}
+			}
+			
 		}
 		
 	}

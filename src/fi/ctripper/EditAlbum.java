@@ -1,5 +1,6 @@
 package fi.ctripper;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -81,39 +83,17 @@ public class EditAlbum extends FragmentActivity {
 			return true;
 		}
 		case R.id.addSection:{
-			this.mSectionsPagerAdapter.addSection();
+			this.mSectionsPagerAdapter.addSectionAtEnd();
+			return true;
 		}
-
-		case R.id.removeSection:{
-//			this.mSectionsPagerAdapter.removeSection(position)
+		case R.id.removeSection:{			
 		}
-			
+			this.mSectionsPagerAdapter.removeCurrentSection();
+			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
 	
-//	@Override
-//	protected void onActivityResult(int requestCode, int resultCode, Intent returnedIntent) {
-//		super.onActivityResult(requestCode, resultCode, returnedIntent);
-//		
-//		switch(requestCode){
-//			case ADD_PHOTO_RESULT:{
-//				if(resultCode == RESULT_OK){
-//			        Uri selectedImage = returnedIntent.getData();
-//			        PhotoSectionFragment fragment = (PhotoSectionFragment) mSectionsPagerAdapter.getItem(1);
-//			        Log.d(TAG, selectedImage.toString());
-//			        fragment.setImage(selectedImage);
-//				}
-//			}
-//		}
-//		
-//	}
-	
-//	public void showBrowsePhotoDialog(View view){
-//		Intent pickPhoto = new Intent(Intent.ACTION_PICK,
-//		           android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-//		startActivityForResult(pickPhoto , 1); //one can be replced with any action code
-//	}
 
 	/**
 	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -125,14 +105,11 @@ public class EditAlbum extends FragmentActivity {
 
 		public SectionsPagerAdapter(FragmentManager fm) {
 			super(fm);
-			this.addSection();
+			this.addSectionAtEnd();
 		}
 
 		@Override
 		public Fragment getItem(int position) {
-			// getItem is called to instantiate the fragment for the given page.
-			// Return a DummySectionFragment (defined as a static inner class
-			// below) with the page number as its lone argument.
 			Fragment fragment = fragmentsList.get(position);			
 			Bundle args = new Bundle();
 			args.putInt(PhotoSectionFragment.ARG_SECTION_NUMBER, position + 1);
@@ -147,15 +124,38 @@ public class EditAlbum extends FragmentActivity {
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-			return "Page-"+position;
+			position++;
+			return "Page("+position+"/"+getCount()+")";
 		}
 		
 		public void removeSection(int position){
 			this.fragmentsList.remove(position);
+		}		
+		
+		public void addSectionAtEnd(){
+			this.fragmentsList.add(new PhotoSectionFragment());
 		}
 		
-		public void addSection(){
-			this.fragmentsList.add(new PhotoSectionFragment());
+		public void removeCurrentSection(){
+			FragmentManager fragmentManager = getSupportFragmentManager();
+			
+			Iterator<Fragment> iter = fragmentsList.iterator();
+			while(iter.hasNext()){
+				Fragment fragment = iter.next();
+				if(fragment.isVisible()){
+					FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+					Log.d(TAG, "Removing fragment:"+fragment);					
+					fragmentTransaction.remove(fragment);
+					fragmentTransaction.commit();
+					this.removeSection(fragment);
+					break;					
+				}
+			}
+			
+		}
+		
+		private void removeSection(Fragment fragment){
+			this.fragmentsList.remove(fragment);
 		}
 	}
 
@@ -172,7 +172,6 @@ public class EditAlbum extends FragmentActivity {
 		public static final String ARG_PHOTO_URI = "photo_uri";
 		private Uri imageUri;
 		private View view;
-		private OnItemSelectedListener listener;
 
 		public PhotoSectionFragment() {
 		}
@@ -184,7 +183,7 @@ public class EditAlbum extends FragmentActivity {
 			View rootView = inflater.inflate(
 					R.layout.fragment_album_photo, container, false);
 			this.view = rootView;
-			
+				
 			// Prepare Image view if image uri is set
 			Uri uri = (Uri) this.getArguments().get(ARG_PHOTO_URI);			
 			if(uri != null){
@@ -250,6 +249,11 @@ public class EditAlbum extends FragmentActivity {
 				}
 			}
 			
+		}
+		
+		@Override
+		public String toString() {
+			return "PhotoSectionFragment {ID:"+this.getId()+", ImageURL:"+getImageUri()+"}";
 		}
 		
 	}
